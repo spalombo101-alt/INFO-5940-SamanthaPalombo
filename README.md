@@ -11,19 +11,71 @@ Forking creates a personal copy of the repo under **your** GitHub account.
 - You can commit, push, and experiment freely.  
 - Your work stays separate from the official class materials.
 
-### Step 2: Open your forked repo Codespace
-1. Go to **your forked repo**.
-2. Click the green **Code** button and switch to the **Codespaces** tab.  
-3. Select **Create Codespace**.
-4. Wait a few minutes for the environment to finish setting up.
+### Step 2: Set your OpenAI API key
 
-### Step 3: Verify your environment 
-Once the Codespace is ready: 
-1. Open `test.ipynb` in your codespace.
-2. Install the Python 3.11.13 Kernel.  In the top-right corner, click **Select Kernel**.
-    1. If **Install/Enable suggested extensions Python + Jupyter** appears, select it, and wait for the install to finish before moving on to the next step.
-    2. Select **Python Environments** choose **Python 3.11.13 (first option)**.
-3. Run the first code block to check your setup. You should see `openai` import successfully.
+This class uses Cornell's **AI API Gateway**. See
+[AI API Gateway](https://confluence.cornell.edu/spaces/citai/pages/541787315/AI+API+Gateway)
+for details on the service and how to obtain your key.
+
+Your API key is a **secret**. Never paste it into a file in this repository — your
+fork is public, and a committed key is a leaked key.
+
+Instead, store it as a GitHub Codespaces secret. GitHub injects it into the
+environment automatically, and it never touches the filesystem.
+
+1. Go to [**github.com/settings/codespaces**](https://github.com/settings/codespaces).
+2. Under **Codespaces secrets**, click **New secret**.
+3. Set:
+   - **Name:** `OPENAI_API_KEY`
+   - **Value:** the key you received for the class
+4. Under **Repository access**, select your fork of this repository.
+5. Click **Add secret**.
+
+> Set the secret **before** creating your Codespace. If you have already created
+> one, the secret only appears after you rebuild it:
+> **Cmd/Ctrl + Shift + P** → **Codespaces: Rebuild Container**.
+
+You do not need to set `OPENAI_BASE_URL` — the Codespace points it at the
+Cornell [AI API Gateway](https://confluence.cornell.edu/spaces/citai/pages/541787315/AI+API+Gateway)
+for you.
+
+<details>
+<summary><b>Working outside Codespaces?</b> (optional — most students can skip this)</summary>
+
+If you run the notebooks on your own machine instead of in a Codespace, there is
+no Codespaces secret to inject, so use a local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Then open `.env` and fill in your key. `.env` is listed in `.gitignore`, so it
+will not be committed.
+
+In a Codespace the secret takes priority — `.env` is only ever a fallback, so
+having both is safe.
+
+</details>
+
+### Step 3: Open your forked repo Codespace
+1. Go to **your forked repo**.
+2. Click the green **Code** button and switch to the **Codespaces** tab.
+3. Select **Create Codespace**.
+4. Wait a few minutes for the environment to finish setting up. The terminal
+   prints `==> Setup complete.` when it is done, and warns you if your API key
+   is missing.
+
+### Step 4: Verify your environment
+Once the Codespace is ready:
+1. Open `test.ipynb`.
+2. Click **Run All**.
+3. All four cells should print a ✅, ending with a reply from the model.
+
+The Python 3.11 interpreter is preselected, so you should not need to choose a
+kernel manually. If VS Code does ask, pick **Python 3.11.13**.
+
+If a cell fails, its message says what to fix — most often a missing API key
+(Step 2).
 
 ## About GitHub Codespaces
 
@@ -70,18 +122,36 @@ Follow these steps to launch and view your Streamlit app in GitHub Codespaces:
    ```  
    *(Replace `your-file-name.py` with the actual name of your Streamlit app file, e.g., `hello_app.py`.)*  
 
-3. After pressing **Enter**, a popup should appear in the bottom-right corner of Codespace editor.  
-   - Click **“Open in Browser”** to view your app.  
+3. After pressing **Enter**, Codespaces forwards port **8501** and opens the app
+   in a new browser tab.
 
-   ⚠️ *If you miss the popup:*  
-   - Press **Ctrl + C** in the terminal to stop the app.  
-   - Rerun the command from step 2 — the popup should appear again.  
+   *If the tab does not open:* go to the **Ports** tab in the bottom panel, find
+   **Streamlit App** on port 8501, and click the globe icon to open it.
 
-4. A new browser tab will open, showing the interface of your Streamlit app.  
-
-5. **Make changes to your code** in the Codespace editor.  
+4. **Make changes to your code** in the Codespace editor.
    - Refresh the browser tab to see the updated version of your app.  
 
 
 ## Troubleshooting
-- The Jupyter extension should install automatically. If you still cannot select a Python kernel on Jupyter Notebook: Go to the left sidebar >> **Extensions** >> search for **Jupyter** >> reload window (or reinstall it).   
+
+**`OPENAI_API_KEY is not set`**
+The Codespaces secret is missing or was added after this Codespace was created.
+Check Step 2, then run **Codespaces: Rebuild Container** from the command palette.
+
+**The API call in `test.ipynb` returns an authentication error**
+The secret exists but the value is wrong or incomplete. Re-enter it at
+[github.com/settings/codespaces](https://github.com/settings/codespaces),
+confirm your fork is selected under **Repository access**, and rebuild.
+
+**A package is missing**
+Rerun the setup from the terminal:
+```bash
+bash ./.devcontainer/setup.sh
+```
+
+**No Python kernel offered in the notebook**
+Left sidebar → **Extensions** → confirm **Python** and **Jupyter** are installed,
+then reload the window.
+
+**Never commit your key.** `.gitignore` excludes `.env` files, but the safest
+approach is the Codespaces secret above, which never creates a file at all.
